@@ -53,6 +53,8 @@ const createFSM = (transitionRules) => {
 };
 
 // application
+
+// store definition
 const COUNTER_DECREMENT = 'COUNTER_DECREMENT';
 const COUNTER_RESET = 'COUNTER_RESET';
 const counter = (state=0, action) => {
@@ -77,86 +79,19 @@ const counterResetAction = (duration) => ({
 });
 
 const REDCOUNTER_DURATION = 5;
-const REDCOUNTER_DECREMENT = 'REDCOUNTER_DECREMENT';
-const REDCOUNTER_RESET = 'REDCOUNTER_RESET';
-const redCounter = (state=REDCOUNTER_DURATION, action) => {
-  if (!action) {
-    return state;
-  }
-  switch(action.type) {
-    case REDCOUNTER_DECREMENT:
-      return counter(state, counterDecrementAction());
-    case REDCOUNTER_RESET:
-      return counter(state, counterResetAction(REDCOUNTER_DURATION));
-    default:
-      return state;
-  }
-}
-const redCounterDecrementAction = () => ({
-  type: REDCOUNTER_DECREMENT,
-});
-const redCounterResetAction = () => ({
-  type: REDCOUNTER_RESET,
-});
-
-
 const YELLOWCOUNTER_DURATION = 7;
-const YELLOWCOUNTER_DECREMENT = 'YELLOWCOUNTER_DECREMENT';
-const YELLOWCOUNTER_RESET = 'YELLOWCOUNTER_RESET';
-const yellowCounter = (state=YELLOWCOUNTER_DURATION, action) => {
-  if (!action) {
-    return state;
-  }
-  switch(action.type) {
-    case YELLOWCOUNTER_DECREMENT:
-      return counter(state, counterDecrementAction());
-    case YELLOWCOUNTER_RESET:
-      return counter(state, counterResetAction(YELLOWCOUNTER_DURATION));
-    default:
-      return state;
-  }
-}
-const yellowCounterDecrementAction = () => ({
-  type: YELLOWCOUNTER_DECREMENT,
-});
-const yellowCounterResetAction = () => ({
-  type: YELLOWCOUNTER_RESET,
-});
-
 const GREENCOUNTER_DURATION = 9;
-const GREENCOUNTER_DECREMENT = 'GREENCOUNTER_DECREMENT';
-const GREENCOUNTER_RESET = 'GREENCOUNTER_RESET';
-const greenCounter = (state=GREENCOUNTER_DURATION, action) => {
-  if (!action) {
-    return state;
-  }
-  switch(action.type) {
-    case GREENCOUNTER_DECREMENT:
-      return counter(state, counterDecrementAction());
-    case GREENCOUNTER_RESET:
-      return counter(state, counterResetAction(GREENCOUNTER_DURATION));
-    default:
-      return state;
-  }
-}
-const greenCounterDecrementAction = () => ({
-  type: GREENCOUNTER_DECREMENT,
-});
-const greenCounterResetAction = () => ({
-  type: GREENCOUNTER_RESET,
-});
 
 const trafficLightCounter = combineUpdater({
-  redCounter,
-  yellowCounter,
-  greenCounter,
+  counter,
 });
 
 const store = createStore(trafficLightCounter);
 
-const redToYellowCondition = (data) => data.redCounter <= 0;
-const yellowToGreenCondition = (data) => data.yellowCounter <= 0;
-const greenToRedCondition = (data) => data.greenCounter <= 0;
+// fsm definition
+const redToYellowCondition = (data) => data.counter <= 0;
+const yellowToGreenCondition = (data) => data.counter <= 0;
+const greenToRedCondition = (data) => data.counter <= 0;
 
 const transitionRules = [
   { from: 'red', to: 'yellow', when: redToYellowCondition },
@@ -166,45 +101,60 @@ const transitionRules = [
 
 const fsm = createFSM(transitionRules);
 
-// app start
-fsm.begin('red');
+// render definition
+const render = (state, data) => {
+  document.getElementById('app').innerHTML = `
+    <h1>${state.current}</h1>
+    <p>${('00' + data.counter).slice(-2)}</h1>
+  `;
+};
 
 // app maintenance
 store.subscribe(() => {
-  console.log(store.getData());
-  fsm.doTransition(store.getData());
   // render ?
+  render(
+    {
+      prev: fsm.getPreviousState(),
+      current: fsm.getCurrentState()
+    }, 
+    store.getData()
+  );
+  console.log(fsm.getCurrentState(), store.getData());
+  fsm.doTransition(store.getData());
 });
+
+// app start
+fsm.begin('red');
+store.dispatch(counterResetAction(REDCOUNTER_DURATION));
 
 // app trigger
 setInterval(() => {
-  switch(fsm.getCurrentState()) {
-    case 'red':
-      switch(fsm.getPreviousState()) {
-        case 'green':
-          store.dispatch(redCounterResetAction());
-          break;
-        default:
-          store.dispatch(redCounterDecrementAction());
-      }
-      break;
-    case 'yellow':
-      switch(fsm.getPreviousState()) {
-        case 'red':
-          store.dispatch(yellowCounterResetAction());
-          break;
-        default:
-          store.dispatch(yellowCounterDecrementAction());
-      }
-      break;
-    case 'green':
-      switch(fsm.getPreviousState()) {
-        case 'yellow':
-          store.dispatch(greenCounterResetAction());
-          break;
-        default:
-          store.dispatch(greenCounterDecrementAction());
-      }
-      break;
-  }
+  const prevState = fsm.getPreviousState();
+  const currentState = fsm.getCurrentState();
+
+  console.log(`${prevState} -> ${currentState}`);
+
+  if (currentState === 'red') {
+    if (prevState === 'green') {
+      store.dispatch(counterResetAction(REDCOUNTER_DURATION));
+    } else {
+      store.dispatch(counterDecrementAction());
+    }
+  } 
+
+  if (currentState === 'yellow') {
+    if (prevState === 'red') {
+      store.dispatch(counterResetAction(YELLOWCOUNTER_DURATION));
+    } else {
+      store.dispatch(counterDecrementAction());
+    }
+  } 
+
+  if (currentState === 'green') {
+    if (prevState === 'yellow') {
+      store.dispatch(counterResetAction(GREENCOUNTER_DURATION));
+    } else {
+      store.dispatch(counterDecrementAction());
+    }
+  } 
 }, 1000);

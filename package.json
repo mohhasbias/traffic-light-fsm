@@ -6,6 +6,7 @@
   "dependencies": {
     "babel-preset-flow": "^6.23.0",
     "flow-bin": "^0.63.1",
+    "javascript-state-machine": "^3.0.1",
     "jest": "^22.0.6",
     "poi": "^9.6.12"
   },
