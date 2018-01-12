@@ -1,0 +1,16 @@
+{
+  "name": "traffic-light",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "babel-preset-flow": "^6.23.0",
+    "flow-bin": "^0.63.1",
+    "jest": "^22.0.6",
+    "poi": "^9.6.12"
+  },
+  "scripts": {
+    "start": "poi",
+    "test": "jest --watchAll"
+  }
+}
