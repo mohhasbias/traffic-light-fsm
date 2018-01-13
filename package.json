@@ -8,7 +8,8 @@
     "flow-bin": "^0.63.1",
     "javascript-state-machine": "^3.0.1",
     "jest": "^22.0.6",
-    "poi": "^9.6.12"
+    "poi": "^9.6.12",
+    "redux": "^3.7.2"
   },
   "scripts": {
     "start": "poi",
