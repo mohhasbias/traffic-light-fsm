@@ -1,6 +1,6 @@
 # Traffic Light Simulator, FSM based
 
-this is a FSM approach for simulating traffic.
+this is a FSM approach for simulating traffic light.
 
 using several libraries:
 1. [javascript-state-machines](https://github.com/jakesgordon/javascript-state-machine) by jake gordon
