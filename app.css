@@ -10,6 +10,8 @@ body {
   height: 60px;
   border-radius: 100%;
   color: transparent;
+  font-size: 1px;
+  margin-bottom: 5px;
 }
 
 .red.active {

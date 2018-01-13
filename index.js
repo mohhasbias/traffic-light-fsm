@@ -1,38 +1,29 @@
 // @flow
 // definition
-import { JSM, createStore, combineUpdater } from './engine/fsm';
+import { JSM, createStore, combineUpdater, createActions, handleActions } from './engine/fsm';
 
 import './app.css';
 
 // application
 
 // updater definition
-const COUNTER_DECREMENT = 'COUNTER_DECREMENT';
-const COUNTER_RESET = 'COUNTER_RESET';
-const counter = (state=0, action) => {
-  if (!action) {
-    return state;
+const actions = createActions({
+  COUNTER: {
+    DECREMENT: () => {},
+    RESET: (duration) => duration,
   }
-  switch(action.type) {
-    case COUNTER_DECREMENT:
-      return state - 1;
-    case COUNTER_RESET:
-      return action.payload;
-    default:
-      return state;
-  }
-}
-const counterDecrementAction = () => ({
-  type: COUNTER_DECREMENT
-});
-const counterResetAction = (duration) => ({
-  type: COUNTER_RESET,
-  payload: duration
 });
 
-const REDCOUNTER_DURATION = 0;
-const YELLOWCOUNTER_DURATION = 0;
-const GREENCOUNTER_DURATION = 0;
+const counter = handleActions(
+  {
+    [actions.counter.decrement]: (state, action) => state - 1,
+    [actions.counter.reset]: (state, action) => action.payload,
+  },
+  0
+);
+
+const counterDecrementAction = actions.counter.decrement;
+const counterResetAction = actions.counter.reset;
 
 const trafficLightCounter = combineUpdater({
   counter,
@@ -77,6 +68,9 @@ store.subscribe(() => {
   console.log(fsm.state, store.getData());
 });
 
+const REDCOUNTER_DURATION = 10;
+const YELLOWCOUNTER_DURATION = 2;
+const GREENCOUNTER_DURATION = 10;
 fsm.onAfterTransition = (lifecycle) => {
   const { from, to } = lifecycle;
   console.log(`${from} -> ${to}`);
