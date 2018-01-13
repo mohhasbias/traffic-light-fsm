@@ -57,13 +57,12 @@ const render = (state, data) => {
       '<h1 class="green active">Green</h1>' :
       '<h2 class="green">Green</h2>'
     }
-    <p>${('00' + data.counter).slice(-2)}</h1>
+    <h1>${('00' + data.counter).slice(-2)}</h1>
   `;
 };
 
 // app maintenance
 store.subscribe(() => {
-  // render ?
   render({ current: fsm.state }, store.getData());
   console.log(fsm.state, store.getData());
 });
